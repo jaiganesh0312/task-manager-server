@@ -1,12 +1,13 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/database");
+const { v7: uuidv7 } = require("uuid");
 
 const RefreshToken = sequelize.define(
     "RefreshToken",
     {
         id: {
             type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
+            defaultValue: () => uuidv7(),
             primaryKey: true,
         },
         token: {
