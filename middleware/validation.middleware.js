@@ -95,6 +95,33 @@ const uuidParamValidation = [
     validate,
 ];
 
+// ===== PROJECT VALIDATIONS =====
+const createProjectValidation = [
+    body("name")
+        .trim()
+        .notEmpty()
+        .withMessage("Project name is required")
+        .isLength({ min: 2, max: 150 })
+        .withMessage("Project name must be between 2 and 150 characters"),
+    body("description")
+        .optional()
+        .trim()
+        .isLength({ max: 1000 })
+        .withMessage("Description must be less than 1000 characters"),
+    body("teamId").notEmpty().withMessage("Team ID is required").isUUID().withMessage("Invalid team ID"),
+    body("status")
+        .optional()
+        .isIn(["planning", "active", "on-hold", "completed", "cancelled"])
+        .withMessage("Invalid status"),
+    body("priority")
+        .optional()
+        .isIn(["low", "medium", "high", "critical"])
+        .withMessage("Invalid priority"),
+    body("startDate").optional().isISO8601().withMessage("Invalid start date format"),
+    body("endDate").optional().isISO8601().withMessage("Invalid end date format"),
+    validate,
+];
+
 module.exports = {
     validate,
     registerValidation,
@@ -102,4 +129,5 @@ module.exports = {
     createTeamValidation,
     paginationValidation,
     uuidParamValidation,
+    createProjectValidation,
 };
