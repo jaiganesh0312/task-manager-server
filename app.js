@@ -5,6 +5,7 @@ const { kafka } = require("./config/kafka.config");
 dotenv.config();
 
 const cors = require("cors");
+const helmet = require("helmet");
 const morgan = require("morgan");
 const { sequelize } = require("./models");
 const routes = require("./routes");
@@ -13,8 +14,25 @@ const { initProducer, disconnectProducer } = require("./services/kafka/kafka.pro
 const { initConsumer, disconnectConsumer } = require("./services/kafka/kafka.consumer");
 
 // Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", process.env.CLIENT_URL],
+            fontSrc: ["'self'", "https:", "data:"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+}));
+
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
