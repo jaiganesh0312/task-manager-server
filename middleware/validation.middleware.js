@@ -120,6 +120,70 @@ const createProjectValidation = [
     body("startDate").optional().isISO8601().withMessage("Invalid start date format"),
     body("endDate").optional().isISO8601().withMessage("Invalid end date format"),
     validate,
+    validate,
+];
+
+// ===== TASK VALIDATIONS =====
+const createTaskValidation = [
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Task title is required")
+        .isLength({ min: 1, max: 200 })
+        .withMessage("Task title must be between 1 and 200 characters"),
+    body("description").optional().trim(),
+    body("priority")
+        .optional()
+        .isIn(["low", "medium", "high", "urgent"])
+        .withMessage("Invalid priority"),
+    body("status")
+        .optional()
+        .isIn(["todo", "in-progress", "review", "completed"])
+        .withMessage("Invalid status"),
+    body("dueDate")
+        .optional()
+        .isISO8601()
+        .withMessage("Invalid due date format"),
+    body("estimatedHours")
+        .optional()
+        .isFloat({ min: 0 })
+        .withMessage("Estimated hours must be a positive number")
+        .toFloat(),
+    body("isPersonal")
+        .optional()
+        .isBoolean()
+        .withMessage("isPersonal must be a boolean")
+        .toBoolean(),
+    body("tags")
+        .optional()
+        .isArray()
+        .withMessage("Tags must be an array of strings"),
+    validate,
+];
+
+const updateTaskStatusValidation = [
+    body("status")
+        .notEmpty()
+        .withMessage("Status is required")
+        .isIn(["todo", "in-progress", "review", "completed"])
+        .withMessage("Invalid status"),
+    validate,
+];
+
+// ===== SUBTASK VALIDATIONS =====
+const createSubtaskValidation = [
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Subtask title is required")
+        .isLength({ min: 1, max: 200 })
+        .withMessage("Subtask title must be between 1 and 200 characters"),
+    body("description").optional().trim(),
+    body("status")
+        .optional()
+        .isIn(["todo", "in-progress", "completed"])
+        .withMessage("Invalid status"),
+    validate,
 ];
 
 module.exports = {
@@ -130,4 +194,7 @@ module.exports = {
     paginationValidation,
     uuidParamValidation,
     createProjectValidation,
+    createTaskValidation,
+    updateTaskStatusValidation,
+    createSubtaskValidation,
 };
