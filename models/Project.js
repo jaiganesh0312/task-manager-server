@@ -36,6 +36,10 @@ const Project = sequelize.define(
             type: DataTypes.DATEONLY,
             allowNull: true,
         },
+        isPersonal: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
         color: {
             type: DataTypes.STRING(7),
             allowNull: true,

@@ -9,7 +9,17 @@ const { getPaginationOptions, getPaginatedResponse } = require("../utils/paginat
 const getTeams = asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationOptions(req.query);
 
+    // If employee, return only their team
+    const where = {};
+    if (req.user.role === "employee") {
+        if (!req.user.teamId) {
+            return res.json({ success: true, data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
+        }
+        where.id = req.user.teamId;
+    }
+
     const { count, rows: teams } = await Team.findAndCountAll({
+        where,
         include: [
             { model: User, as: "manager", attributes: ["id", "name", "email", "avatar"] },
             { model: User, as: "members", attributes: ["id", "name", "email", "avatar", "role"] },

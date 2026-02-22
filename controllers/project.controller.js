@@ -23,9 +23,19 @@ const getProjects = asyncHandler(async (req, res) => {
         ];
     }
 
-    // If employee, only show projects from their team
-    if (req.user.role === "employee" && req.user.teamId) {
-        where.teamId = req.user.teamId;
+    // If employee, only show projects from their team or their personal projects
+    if (req.user.role === "employee") {
+        const employeeConditions = [{ isPersonal: true, createdById: req.user.id }];
+        if (req.user.teamId && !where.teamId) {
+            employeeConditions.push({ teamId: req.user.teamId });
+        } else if (where.teamId) {
+            employeeConditions.push({ teamId: where.teamId });
+        }
+
+        // Remove existing teamId from root where to avoid conflict with OR
+        delete where.teamId;
+
+        where[Op.or] = where[Op.or] ? [...where[Op.or], { [Op.or]: employeeConditions }] : employeeConditions;
     }
 
     const { count, rows: projects } = await Project.findAndCountAll({
@@ -121,26 +131,31 @@ const getProjectById = asyncHandler(async (req, res) => {
  * POST /api/projects
  */
 const createProject = asyncHandler(async (req, res) => {
-    const { name, description, teamId, status, priority, startDate, endDate, color } = req.body;
+    const { name, description, teamId, status, priority, startDate, endDate, color, isPersonal } = req.body;
 
-    // Verify team exists
-    const team = await Team.findByPk(teamId);
-    if (!team) {
-        throw new ApiError(404, "Team not found");
+    // Verify team exists if it is not a personal project
+    if (!isPersonal) {
+        if (!teamId) {
+            throw new ApiError(400, "Team ID is required for team projects");
+        }
+        const team = await Team.findByPk(teamId);
+        if (!team) {
+            throw new ApiError(404, "Team not found");
+        }
     }
 
     const project = await Project.create({
         name,
         description,
-        teamId,
+        teamId: isPersonal ? null : teamId,
         status,
         priority,
         startDate,
         endDate,
         color,
+        isPersonal: isPersonal || false,
         createdById: req.user.id,
     });
-
     const createdProject = await Project.findByPk(project.id, {
         include: [
             { model: Team, as: "team", attributes: ["id", "name"] },
