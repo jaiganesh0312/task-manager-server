@@ -6,12 +6,13 @@ const { v7: uuidv7 } = require('uuid');
 let storageOptions = {};
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     storageOptions.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-} else if (process.env.GCS_CREDENTIALS_JSON) {
+} else if (process.env.GCS_CREDENTIALS) {
     // Alternatively pass credentials as JSON string
     try {
-        storageOptions.credentials = JSON.parse(process.env.GCS_CREDENTIALS_JSON);
+        const decodedCredentials = Buffer.from(process.env.GCS_CREDENTIALS, 'base64').toString('utf8');
+        storageOptions.credentials = JSON.parse(decodedCredentials);
     } catch (e) {
-        console.error('Invalid GCS_CREDENTIALS_JSON format');
+        console.error('Invalid GCS_CREDENTIALS_JSON format or encoding');
     }
 }
 
@@ -45,7 +46,6 @@ const uploadToGCS = async (fileBuffer, originalName, mimeType, folder = 'avatars
             metadata: {
                 contentType: mimeType,
             },
-            public: true, // Make file publicly accessible
         });
 
         // Generate the public URL
