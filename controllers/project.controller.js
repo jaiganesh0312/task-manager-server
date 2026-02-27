@@ -94,7 +94,7 @@ const getProjectById = asyncHandler(async (req, res) => {
 
     const project = await Project.findByPk(id, {
         include: [
-            { model: Team, as: "team" },
+            { model: Team, as: "team", include: [{ model: User, as: "members", attributes: ["id", "name", "email"] }] },
             { model: User, as: "creator", attributes: ["id", "name", "email"] },
             {
                 model: Task,
