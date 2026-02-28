@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const { kafka } = require("./config/kafka.config");
+const { kafka, createTopics } = require("./config/kafka.config");
 dotenv.config();
 
 const cors = require("cors");
@@ -69,6 +69,7 @@ app.listen(PORT, async () => {
     try {
         await sequelize.sync({ alter: true });
         console.log("✅ Database synchronized successfully");
+        await createTopics();
         // Initialize Kafka producer and consumer
         await initProducer();
         await initConsumer();
